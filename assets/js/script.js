@@ -23,9 +23,10 @@ var apiUrl = 'https://api.openweathermap.org/data/2.5/weather?q=';
 //URL for 5 day forecast
 var apiForecastUrl = 'https://api.openweathermap.org/data/2.5/forecast?q=';
 //API query parameters
-var apiUvUrl = 'https://api.openweathermap.org/data/2.5/uvi';
+var apiUvUrl = 'https://api.openweathermap.org/data/2.5/uvi?lat=';
 var units = '&units=imperial';
 var apiKey = '&appid=dfd70fe025fe63321e2acd91e52a5ebf';
+
 
 //variable to store searched city
 var cityHistory = [];
@@ -61,9 +62,9 @@ var getCurrentWeather = function (city) {
 				console.log(data);
         displayCurrentWeather(data, city);
       })
-      .catch(function (error) {
-        alert('Not found. Please try again.', error);
-      });
+      // .catch(function (error) {
+      //   alert('Not found. Please try again.', error);
+      // });
   });
 };
 
@@ -83,23 +84,24 @@ var displayCurrentWeather = function (response, searchCity) {
 
   //date to human readable format
   var dateTodayEl = document.createElement('span');
-  var dateFormat = new Date(data.dt * 1000).toLocaleDateString();
+	var dateFormat = new Date(response.dt * 1000).toLocaleDateString();
+	console.log(dateFormat);
   dateTodayEl.textContent = '(' + dateFormat + ')';
   currentCityName.appendChild(dateTodayEl);
-
-  //create current weather icon
-  var iconUrl = `https://openweathermap.org/img/wn/${icon}@2x.png`;
-  var icon = data.weather[0].icon;
+	
+	//create current weather icon
+	var icon = response.weather[0].icon;
+  var iconUrlCurrent = 'http://openweathermap.org/img/wn/' + icon + '.png';
   var imgEl = document.createElement('img');
-  imgEl.setAttribute('src', iconUrl);
+  imgEl.setAttribute('src', iconUrlCurrent);
   imgEl.setAttribute('width', '50');
   imgEl.setAttribute('height', '50');
   dateTodayEl.appendChild(imgEl);
 
   //get temp, humidity, windspeed
-  var { temp, humidity } = data.main;
-  var { temp, humidity } = data.main;
-  var windSpeed = data.wind.speed;
+  var { temp, humidity } = response.main;
+  var { temp, humidity } = response.main;
+  var windSpeed = response.wind.speed;
 
   //create a temp element
   var currentTempEl = document.createElement('p');
@@ -113,36 +115,39 @@ var displayCurrentWeather = function (response, searchCity) {
   currentWeatherSectionEl.appendChild(currentHumidityEl);
 
   //create a windspeed Element
-  var currentHumidity = document.createElement('p');
+  var currentWindSpeedEl = document.createElement('p');
   currentWindSpeedEl.textContent = 'Windspeed: ' + windSpeed + ' MPH';
   currentWeatherSectionEl.appendChild(currentWindSpeedEl);
 
-  var lat = data.coord.lat;
-  var lon = data.coord.long;
+  var lat = response.coord.lat;
+	var lon = response.coord.lon;
+
   fetchUvInfo(lat, lon);
 };
 
 var fetchUvInfo = function (lat, lon) {
-  fetch(apiUvUrl + apiKey + lat + lon).then(function (response) {
-    response.json().then(function (data) {
-      displayUVIndex(data);
-      console.log(data);
+	apiUvUrl = apiUvUrl + lat + "&lon="+ lon + apiKey;
+	console.log(apiUvUrl);
+  fetch(apiUvUrl).then(function (response) {
+    response.json().then(function (uv) {
+      displayUvInfo(uv);
+      console.log(uv);
     });
   });
 };
 
-var displayUVInfo = function (index) {
-  var uvIndexEl = document.createElement('p');
+var displayUvInfo = function (uv) {
+  var uvVal = document.createElement('p');
   uvVal.textContent = 'UV Index: ';
 
   uvVal = document.createElement('span');
-  uvVal.textContent = index.value;
+  uvVal.textContent = uv.value;
 
-  if (index.value <= 2) {
+  if (uv.value <= 2) {
     uvVal.classList = 'favorable';
-  } else if (index.value > 2 && index.value <= 8) {
+  } else if (uv.value > 2 && uv.value <= 8) {
     uvVal.classList = 'moderate ';
-  } else if (index.value > 8) {
+  } else if (uv.value > 8) {
     uvVal.classList = 'severe';
   }
 };
@@ -150,85 +155,58 @@ var displayUVInfo = function (index) {
 var getForecast = function (city) {
 	apiForecastUrl = apiForecastUrl + city + units + apiKey
 	console.log(apiForecastUrl);
-  fetch(apiForecastUrl).then(function (response) {
-    response.json().then(function (data) {
-      displayForecast(data);
-      console.log(data);
+	fetch(apiForecastUrl)
+	.then(function (response) {
+		response.json()
+	.then(function (forecast) {
+			//display forecast
+			forecast.list.forEach(function(day) {
+				
+				console.log(day.weather[0].icon);
+				var iconCode = day.weather[0].icon;
+				var temp = day.main.temp;
+		
+			//create a div to hold the card
+			var forecastCard = document.createElement('div');
+			forecastCard.classList = 'card-body bg-primary text-light text-center';
+			forecastEl.appendChild(forecastCard);
+			//create and add date element to card
+			var forecastDate = document.createElement('h5');
+			forecastDate.classList = 'card-title text-center';
+			forecastDate.textContent = new Date(day.dt).toLocaleDateString();
+			forecastEl.appendChild(forecastDate);
+		
+				//create an icon element
+				
+				var iconUrl = 'http://openweathermap.org/img/wn/' + iconCode + '.png';
+		
+				var forecastIcon = document.createElement('img');
+				forecastIcon.classList = 'text-center';
+				forecastIcon.setAttribute(
+					'src',
+					iconUrl
+				);
+				forecastIcon.setAttribute('width', '50');
+				forecastIcon.setAttribute('height', '50');
+				forecastEl.appendChild(forecastIcon);
+			
+				//create temperature
+		
+				var forecastTemp = document.createElement('p');
+				forecastTemp.classList = 'text-center';
+				forecastTemp.textContent = temp + ' °F';
+				//append to forecast card
+				forecastEl.appendChild(forecastTemp);
+		
+				//append to five day container
+				// forecastContainerEl.appendChild(forecastEl);
+			console.log(forecast);
     });
   });
-};
+	});
+}
 
-var displayForecast = function (data) {
-  forecastEl.textContent = '';
-  var forecast = data.list;
-  for (var i = 5; i < forecast.length; i = i++) {
-    var dailyForecast = forecast[i];
-    var forecastEl = document.createElement('div');
-    forecastEl.classList = 'card-body bg-primary text-light text-center';
-    forecastEl.appendChild(forecastDate);
 
-    //create date element
-    var forecastCardDate = document.createElement('h5');
-    forecastCardDate.classList = 'card-title';
-
-    //create an icon element
-
-    var forecastIcon = document.createElement('img');
-    forecastIcon.classList = 'text-center';
-    forecastIcon.setAttribute(
-      'src',
-      `https://openweathermap.org/img/wn/${dailyForecast.weather[0].icon}@2x.png`
-    );
-    img.setAttribute('width', '50');
-    img.setAttribute('height', '50');
-
-    //append forecastIcon to card
-    forecastEl.appendChild(forecastIcon);
-
-    //create temperature
-
-    var forecastTemp = document.createElement('p');
-    forecast.classList - 'text-center';
-    forecastTemp.textContent = dailyForecast.main.temp + '° F';
-    //append to forecast card
-    forecastEl.appendChild(forecastTemp);
-
-    var forecastDate = document.createElement('h5');
-    forecastDate.textContent = new Date(dailyForecast.dt).toLocaleDateString();
-    forecastDate.classList = 'card-header text-center';
-    forecastEl.appendChild(forecastDate);
-
-    //create an image element
-    var weatherIcon = document.createElement('img');
-    weatherIcon.classList = 'card-body text-center';
-    weatherIcon.setAttribute(
-      'src',
-      `https://openweathermap.org/img/wn/${dailyForecast.weather[0].icon}@2x.png`
-    );
-
-    //append to forecast card
-    forecastEl.appendChild(weatherIcon);
-
-    //create temperature span
-    var forecastTempEl = document.createElement('span');
-    forecastTempEl.classList = 'card-body text-center';
-    forecastTempEl.textContent = dailyForecast.main.temp + ' °F';
-
-    //append to forecast card
-    forecastEl.appendChild(forecastTempEl);
-
-    var forecastHumEl = document.createElement('span');
-    forecastHumEl.classList = 'card-body text-center';
-    forecastHumEl.textContent = dailyForecast.main.humidity + '  %';
-
-    //append to forecast card
-    forecastEl.appendChild(forecastHumEl);
-
-    // console.log(forecastEl);
-    //append to five day container
-    forecastContainerEl.appendChild(forecastEl);
-  }
-};
 
 var searchHistory = function(searchHistory) {
 	searchHistoryBtn = document.createElement('button');
@@ -247,15 +225,4 @@ var searchHistoryHandler = function (event) {
 
 searchForm.addEventListener('submit', formSubmitHandler);
 searchHistoryEl.addEventListener("click", searchHistoryHandler);
-
-
-
-
-
-
-
-
-
-
-
 
