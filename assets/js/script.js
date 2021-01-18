@@ -19,11 +19,11 @@ var searchField = document.querySelector('#search');
 var forecastEl = document.querySelector('#forecast-cards');
 
 //URL for current weather
-var apiUrl = 'https://api.openweathermap.org/data/2.5/weather?q=';
+var apiUrl = 'http://api.openweathermap.org/data/2.5/weather?q=';
 //URL for 5 day forecast
-var apiForecastUrl = 'https://api.openweathermap.org/data/2.5/forecast?q=';
+var apiForecastUrl = 'http://api.openweathermap.org/data/2.5/forecast?q=';
 //API query parameters
-var apiUvUrl = 'https://api.openweathermap.org/data/2.5/uvi?lat=';
+var apiUvUrl = 'http://api.openweathermap.org/data/2.5/uvi?lat=';
 var units = '&units=imperial';
 var apiKey = '&appid=dfd70fe025fe63321e2acd91e52a5ebf';
 
@@ -126,12 +126,15 @@ var displayCurrentWeather = function (response, searchCity) {
 };
 
 var fetchUvInfo = function (lat, lon) {
+	console.log(lat);
 	apiUvUrl = apiUvUrl + lat + "&lon="+ lon + apiKey;
 	console.log(apiUvUrl);
-  fetch(apiUvUrl).then(function (response) {
-    response.json().then(function (uv) {
+	fetch(apiUvUrl)
+		.then(function (response) {
+		response.json()
+		.then(function (uv) {
       displayUvInfo(uv);
-      console.log(uv);
+      console.log(uv.value);
     });
   });
 };
@@ -139,17 +142,20 @@ var fetchUvInfo = function (lat, lon) {
 var displayUvInfo = function (uv) {
   var uvVal = document.createElement('p');
   uvVal.textContent = 'UV Index: ';
-
-  uvVal = document.createElement('span');
-  uvVal.textContent = uv.value;
-
+	var uvSpan = document.createElement('span');
+	uvSpan.textContent = uv.value;
+//add UV class to uvSpan, depending on conditions
   if (uv.value <= 2) {
-    uvVal.classList = 'favorable';
-  } else if (uv.value > 2 && uv.value <= 8) {
-    uvVal.classList = 'moderate ';
-  } else if (uv.value > 8) {
-    uvVal.classList = 'severe';
-  }
+    uvSpan.classList = 'favorable bg-success p-1';
+  } else if (uv.value > 2 && uv.value <= 7) {
+    uvSpan.classList = 'moderate bg-warning p-1 ';
+  } else if (uv.value >= 8) {
+    uvSpan.classList = 'severe bg-danger p-1';
+	}
+	
+	uvVal.appendChild(uvSpan)
+	currentWeatherSectionEl.appendChild(uvVal);
+
 };
 
 var getForecast = function (city) {
@@ -160,8 +166,13 @@ var getForecast = function (city) {
 		response.json()
 	.then(function (forecast) {
 			//display forecast
-			forecast.list.forEach(function(day) {
-				
+			
+			//openweather is returning data for every 3 hours, but we only need one per day...
+			for (var i=5; i > forecast.length; i+=8) {
+
+
+				console.log(forecast);
+			
 				console.log(day.weather[0].icon);
 				var iconCode = day.weather[0].icon;
 				var temp = day.main.temp;
@@ -201,10 +212,15 @@ var getForecast = function (city) {
 				//append to five day container
 				// forecastContainerEl.appendChild(forecastEl);
 			console.log(forecast);
-    });
-  });
+			
+			
+			}
+
+				
+				
 	});
-}
+});
+};
 
 
 
@@ -220,8 +236,16 @@ var searchHistory = function(searchHistory) {
 }
 
 var searchHistoryHandler = function (event) {
+	var city = event.target.getATtribute("data-city")
+		if(city) {
+			getCurrentWeather(city);
+			getForecast(city);
+		}
   
 };
+
+searchHistory();
+
 
 searchForm.addEventListener('submit', formSubmitHandler);
 searchHistoryEl.addEventListener("click", searchHistoryHandler);
