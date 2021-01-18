@@ -14,6 +14,5 @@ GIVEN a weather dashboard with form inputs:
 
 ## Mock-Up
 The following image shows the web application's appearance and functionality:
-
-weather dashboard demo
+![](assets/demo.png)
 
