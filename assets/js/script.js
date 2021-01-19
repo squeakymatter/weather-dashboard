@@ -1,6 +1,6 @@
-var searchedCityContainerEl = document.querySelector('#search-history-buttons');
 var searchCityForm = document.querySelector('#city-search-form');
 var searchCity = document.querySelector('#search');
+var searchedCityContainerEl = document.querySelector('#search-history-buttons');
 var currentSearchedCity = document.querySelector('#current-city');
 var currentWeatherContainerEl = document.querySelector(
   '#current-weather-container'
@@ -17,6 +17,11 @@ var forecastContainer = document.querySelector('#forecast-cards');
 var apiUnits = '&units=imperial';
 var apiKey = '&appid=dfd70fe025fe63321e2acd91e52a5ebf';
 
+//local storage array
+var cities = [];
+
+var cityName;
+
 var formSubmitHandler = function (event) {
 	event.preventDefault();
 	
@@ -26,18 +31,26 @@ var formSubmitHandler = function (event) {
   var cityName = searchCity.value.trim();
   //update handler to get value of the form input and send it over to getCurrentWeather();
   if (cityName) {
-    //output city name to current weather element;
-    //add city name to the container
-    currentCityNameEl.textContent = cityName;
-    //TODO add current city to local storage
 
-    getGeoCoordinates(cityName);
+		currentCityNameEl.textContent = cityName;
+		getGeoCoordinates(cityName);
+	
     //clear input field after function executes
-    searchCity.value = '';
+		searchCity.value = '';
+		//save to local storage
+		addToLocalStorage(cityName);
+		addToSearchHistory(cityName);
   } else {
     alert('Please enter a city name.');
   }
 };
+
+var btnClickHandler = function (event) {
+	forecastContainer.textContent = "";
+	var cityName = event.target.getAttribute('searched-city');
+	currentCityNameEl.textContent = cityName;
+	getGeoCoordinates(cityName);
+}
 
 var getGeoCoordinates = function (cityName) {
   //lookup the city coordinates first
@@ -172,4 +185,27 @@ var displayForecast = function (data) {
   }
 };
 
+
+//add city to search history, if unique
+
+var addToSearchHistory = function(cityName) {
+	console.log(cityName);
+	var searchButton = document.createElement("button");
+	searchButton.classList = "list-group-item", "list-group-item-action";
+	searchButton.textContent = cityName;
+	searchButton.setAttribute('searched-city', cityName);
+	searchButton.setAttribute("type", "submit")
+	searchedCityContainerEl.appendChild(searchButton);
+}
+
+var addToLocalStorage = function () {
+	if (localStorage.getItem(cityName) === null) {
+		localStorage.setItem("cities", JSON.stringify(cityName));
+	}
+	
+}
+
+
+
 searchCityForm.addEventListener('submit', formSubmitHandler);
+searchedCityContainerEl.addEventListener('click', btnClickHandler);
