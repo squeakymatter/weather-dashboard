@@ -83,7 +83,7 @@ var getGeoCoordinates = function (cityName) {
 
 var getOneCallData = function (lat, lon) {
   var oneCallApiUrl =
-    'httpss://api.openweathermap.org/data/2.5/onecall?lat=' +
+    'https://api.openweathermap.org/data/2.5/onecall?lat=' +
     lat +
     '&lon=' +
     lon +
