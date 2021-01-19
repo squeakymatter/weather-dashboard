@@ -16,6 +16,9 @@ GIVEN a weather dashboard with form inputs:
     - THEN I am presented with a 5-day forecast that displays the date, an icon representation of weather conditions, the temperature, and the humidity
 - WHEN I click on a city in the search history
     - THEN I am again presented with current and future conditions for that city
+    
+## Link to deployed app: 
+https://squeakymatter.github.io/weather-dashboard/    
 
 ## Mock-Up
 The following image shows the web application's appearance and functionality:
