@@ -55,7 +55,7 @@ var btnClickHandler = function (event) {
 var getGeoCoordinates = function (cityName) {
   //lookup the city coordinates first
   var apiUrl =
-    'http://api.openweathermap.org/data/2.5/weather?q=' +
+    'https://api.openweathermap.org/data/2.5/weather?q=' +
     cityName +
     apiUnits +
     apiKey;
@@ -83,7 +83,7 @@ var getGeoCoordinates = function (cityName) {
 
 var getOneCallData = function (lat, lon) {
   var oneCallApiUrl =
-    'https://api.openweathermap.org/data/2.5/onecall?lat=' +
+    'httpss://api.openweathermap.org/data/2.5/onecall?lat=' +
     lat +
     '&lon=' +
     lon +
@@ -112,7 +112,7 @@ var displayCurrentWeather = function (data) {
   currentCityNameEl.appendChild(currentDateSpan);
   //add current weather icon
   var currentWeatherIconUrl =
-    'http://openweathermap.org/img/wn/' + icon + '.png';
+    'https://openweathermap.org/img/wn/' + icon + '.png';
   var currentIcon = document.createElement('img');
   currentIcon.setAttribute('src', currentWeatherIconUrl);
   currentIcon.setAttribute('width', '50');
@@ -165,7 +165,7 @@ var displayForecast = function (data) {
     forecastDate.textContent = new Date(dt * 1000).toLocaleDateString();
     forecastCard.appendChild(forecastDate);
     //create an icon element
-    var iconUrl = 'http://openweathermap.org/img/wn/' + icon + '.png';
+    var iconUrl = 'https://openweathermap.org/img/wn/' + icon + '.png';
     var forecastIcon = document.createElement('img');
     forecastIcon.setAttribute('src', iconUrl);
     forecastIcon.setAttribute('width', '50');
