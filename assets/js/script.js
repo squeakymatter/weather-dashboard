@@ -17,7 +17,6 @@ var forecastContainer = document.querySelector('#forecast-cards');
 var apiUnits = '&units=imperial';
 var apiKey = '&appid=dfd70fe025fe63321e2acd91e52a5ebf';
 
-//local storage array
 var cities = [];
 
 var cityName;
@@ -29,7 +28,7 @@ var formSubmitHandler = function (event) {
 	forecastContainer.textContent = "";
 
   var cityName = searchCity.value.trim();
-  //update handler to get value of the form input and send it over to getCurrentWeather();
+
   if (cityName) {
 
 		currentCityNameEl.textContent = cityName;
@@ -75,8 +74,6 @@ var getGeoCoordinates = function (cityName) {
       }
     })
     .catch(function (error) {
-      //notice this `catch()` getting chained onto the end of the `.then() method
-      //The catch() method returns a Promise and deals with rejected cases only.
       alert('Unable to connect.');
     });
 };
