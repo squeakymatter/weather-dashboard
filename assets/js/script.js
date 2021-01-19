@@ -12,9 +12,32 @@ var currentTempEl = document.querySelector('#current-temp');
 var currentHumidityEl = document.querySelector('#current-humidity');
 var currentWindspeedEl = document.querySelector('#windspeed');
 var currentUvEl = document.querySelector('#uv-index');
+var forecastContainer = document.querySelector('#forecast-cards');
 //global API variables
 var apiUnits = '&units=imperial';
 var apiKey = '&appid=dfd70fe025fe63321e2acd91e52a5ebf';
+
+var formSubmitHandler = function (event) {
+	event.preventDefault();
+	
+	//clear old content
+	forecastContainer.textContent = "";
+
+  var cityName = searchCity.value.trim();
+  //update handler to get value of the form input and send it over to getCurrentWeather();
+  if (cityName) {
+    //output city name to current weather element;
+    //add city name to the container
+    currentCityNameEl.textContent = cityName;
+    //TODO add current city to local storage
+
+    getGeoCoordinates(cityName);
+    //clear input field after function executes
+    searchCity.value = '';
+  } else {
+    alert('Please enter a city name.');
+  }
+};
 
 var getGeoCoordinates = function (cityName) {
   //lookup the city coordinates first
@@ -109,9 +132,10 @@ var displayCurrentWeather = function (data) {
 };
 
 var displayForecast = function (data) {
+
   //add header
   var forecastHeader = document.querySelector('#forecast-header');
-  var forecastContainer = document.querySelector('#forecast-cards');
+
   forecastHeader.textContent = '5-Day Forecast:';
 
   //loop through the days...
@@ -122,7 +146,7 @@ var displayForecast = function (data) {
 
     //create card container
     var forecastCard = document.createElement('div');
-    forecastCard.classList = 'card card-body bg-primary text-light';
+    forecastCard.classList = 'card card-body px-2 bg-primary text-light';
     //create and add date element to card
     var forecastDate = document.createElement('h5');
     forecastDate.textContent = new Date(dt * 1000).toLocaleDateString();
@@ -148,21 +172,4 @@ var displayForecast = function (data) {
   }
 };
 
-var formSubmitHandler = function (event) {
-  event.preventDefault();
-  var cityName = searchCity.value.trim();
-  //update handler to get value of the form input and send it over to getCurrentWeather();
-  if (cityName) {
-    //output city name to current weather element;
-    //add city name to the container
-    currentCityNameEl.textContent = cityName;
-    //TODO add current city to local storage
-
-    getGeoCoordinates(cityName);
-    //clear input field after function executes
-    searchCity.value = '';
-  } else {
-    alert('Please enter a city name.');
-  }
-};
 searchCityForm.addEventListener('submit', formSubmitHandler);
