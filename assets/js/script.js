@@ -17,39 +17,36 @@ var forecastContainer = document.querySelector('#forecast-cards');
 var apiUnits = '&units=imperial';
 var apiKey = '&appid=dfd70fe025fe63321e2acd91e52a5ebf';
 
-var cities = [];
+//localStorage array
+//check if the key-value pair already exists in Local Storage. If not, initialize empty array.
+var cities = JSON.parse(localStorage.getItem('cities')) || [];
 
 var cityName;
 
 var formSubmitHandler = function (event) {
-	event.preventDefault();
-	
-	//clear old content
-	forecastContainer.textContent = "";
+  event.preventDefault();
 
+  //clear old content
   var cityName = searchCity.value.trim();
 
   if (cityName) {
-
-		currentCityNameEl.textContent = cityName;
-		getGeoCoordinates(cityName);
-	
+    currentCityNameEl.textContent = cityName;
+    getGeoCoordinates(cityName);
     //clear input field after function executes
-		searchCity.value = '';
-		//save to local storage
-		addToLocalStorage(cityName);
-		addToSearchHistory(cityName);
+    searchCity.value = '';
+    //save to local storage
+    addToSearchHistoryAndLocalStorage(cityName);
   } else {
     alert('Please enter a city name.');
   }
 };
 
 var btnClickHandler = function (event) {
-	forecastContainer.textContent = "";
-	var cityName = event.target.getAttribute('searched-city');
-	currentCityNameEl.textContent = cityName;
-	getGeoCoordinates(cityName);
-}
+  forecastContainer.textContent = '';
+  var cityName = event.target.getAttribute('searched-city');
+  currentCityNameEl.textContent = cityName;
+  getGeoCoordinates(cityName);
+};
 
 var getGeoCoordinates = function (cityName) {
   //lookup the city coordinates first
@@ -58,7 +55,6 @@ var getGeoCoordinates = function (cityName) {
     cityName +
     apiUnits +
     apiKey;
-  console.log(apiUrl);
   fetch(apiUrl)
     .then(function (response) {
       // request was successful
@@ -66,7 +62,6 @@ var getGeoCoordinates = function (cityName) {
         response.json().then(function (data) {
           var lat = data.coord.lat;
           var lon = data.coord.lon;
-          console.log(lat);
           getOneCallData(lat, lon);
         });
       } else {
@@ -87,7 +82,7 @@ var getOneCallData = function (lat, lon) {
     apiUnits +
     '&exclude=hourly' +
     apiKey;
-  console.log(oneCallApiUrl);
+
   fetch(oneCallApiUrl).then(function (response) {
     response.json().then(function (data) {
       displayCurrentWeather(data);
@@ -142,6 +137,7 @@ var displayCurrentWeather = function (data) {
 };
 
 var displayForecast = function (data) {
+  forecastContainer.textContent = '';
 
   //add header
   var forecastHeader = document.querySelector('#forecast-header');
@@ -155,6 +151,7 @@ var displayForecast = function (data) {
     var icon = data.daily[i].weather[0].icon;
 
     //create card container
+
     var forecastCard = document.createElement('div');
     forecastCard.classList = 'card card-body px-2 bg-primary text-light';
     //create and add date element to card
@@ -182,27 +179,35 @@ var displayForecast = function (data) {
   }
 };
 
+//add city to search history and local storage, if unique
 
-//add city to search history, if unique
+var addToSearchHistoryAndLocalStorage = function (cityName) {
+  for (var i = 0; i < cities.length; i++) {
+    if (cityName === cities[i]) return;
+  }
+  cities.push(cityName);
+  localStorage.setItem('cities', JSON.stringify(cities));
+  addCityToSearchHistory(cityName);
+};
 
-var addToSearchHistory = function(cityName) {
-	console.log(cityName);
-	var searchButton = document.createElement("button");
-	searchButton.classList = "list-group-item", "list-group-item-action";
-	searchButton.textContent = cityName;
-	searchButton.setAttribute('searched-city', cityName);
-	searchButton.setAttribute("type", "submit")
-	searchedCityContainerEl.appendChild(searchButton);
-}
+var addCityToSearchHistory = function (cityName) {
+  var searchButton = document.createElement('button');
+  (searchButton.classList = 'list-group-item'), 'list-group-item-action';
+  searchButton.textContent = cityName;
+  searchButton.setAttribute('searched-city', cityName);
+  searchButton.setAttribute('type', 'submit');
+  searchedCityContainerEl.appendChild(searchButton);
+};
 
-var addToLocalStorage = function () {
-	if (localStorage.getItem(cityName) === null) {
-		localStorage.setItem("cities", JSON.stringify(cityName));
-	}
-	
-}
-
-
+//on page reload, grab cities from array
+var loadSearchListOnRefresh = function () {
+  for (var i = 0; i < cities.length; i++) {
+    addCityToSearchHistory(cities[i]);
+  }
+  //loop through the array and recreate the buttons
+};
 
 searchCityForm.addEventListener('submit', formSubmitHandler);
 searchedCityContainerEl.addEventListener('click', btnClickHandler);
+
+loadSearchListOnRefresh();
